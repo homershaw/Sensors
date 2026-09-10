@@ -95,35 +95,6 @@ Typical low-side wiring is:
 
 Use a lamp supply appropriate for the installed lamps, commonly 12–24 VDC. Verify the exact ESP32_MOS_X4 MOSFET voltage/current capability before connecting field loads.
 
-### Text wiring fallback
-
-The following simplified drawing is retained for environments that do not render SVG images:
-
-```mermaid
-flowchart LR
-    PWR[3.3 V] --> H2SVDD[H2S-SM30-3V VCC]
-    PWR --> OLEDV[OLED VCC]
-    GND[Common GND] --> H2SGND[H2S GND]
-    GND --> OLEDG[OLED GND]
-
-    ESP21[GPIO21 SDA] --- H2SSDA[H2S J3-9 SDA]
-    ESP21 --- OLEDSDA[OLED SDA]
-    ESP22[GPIO22 SCL] --- H2SSCL[H2S J3-8 SCL]
-    ESP22 --- OLEDSCL[OLED SCL]
-
-    ESP19[GPIO19] --> H2SSPAN[H2S J3-11 SPAN]
-    ESP23[GPIO23] --> H2SZERO[H2S J3-13 ZERO]
-    ESP18[GPIO18] --> H2SRESET[H2S J3-10 RESET]
-
-    CAL[CAL button to GND] --> GPIO32[GPIO32]
-    ZERO[ZERO button to GND] --> GPIO33[GPIO33]
-    ENTER[RESET/ENTER button to GND] --> GPIO25[GPIO25]
-
-    SUPPLY[12-24 VDC lamp supply +] --> LOWLAMP[LOW alarm lamp]
-    SUPPLY --> HIGHLAMP[HIGH alarm lamp]
-    LOWLAMP --> MOS1[MOSFET OUT1 / GPIO16]
-    HIGHLAMP --> MOS2[MOSFET OUT2 / GPIO17]
-```
 
 ## Button operation
 
