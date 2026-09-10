@@ -1,0 +1,146 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1050" viewBox="0 0 1600 1050">
+  <defs>
+    <style>
+      .title{font:700 34px Arial,sans-serif;fill:#111}.head{font:700 24px Arial,sans-serif;fill:#111}.label{font:18px Arial,sans-serif;fill:#111}.small{font:15px Arial,sans-serif;fill:#222}.note{font:16px Arial,sans-serif;fill:#222}.box{fill:#f8fbff;stroke:#183b66;stroke-width:3}.sensor{fill:#f3fbf5;stroke:#315f42;stroke-width:3}.oled{fill:#fffaf0;stroke:#755b23;stroke-width:3}.buttons{fill:#fbf8ff;stroke:#7254a3;stroke-width:3;stroke-dasharray:8 5}.alarm{fill:#fff7f7;stroke:#aa2626;stroke-width:3}.notes{fill:#fafafa;stroke:#666;stroke-width:2}.wire{fill:none;stroke-width:4}.thin{fill:none;stroke-width:3}.pin{stroke:#111;stroke-width:2}.ground{stroke:#111;stroke-width:3}.lamp{fill:#ffd94a;stroke:#111;stroke-width:3}
+    </style>
+  </defs>
+
+  <rect width="1600" height="1050" fill="white"/>
+  <text x="800" y="48" text-anchor="middle" class="title">H2SSensor Wiring Schematic — ESP32_MOS_X4 + ELT SM-30-3V + OLED</text>
+
+  <!-- ESP32 -->
+  <rect x="40" y="90" width="430" height="670" rx="4" class="box"/>
+  <text x="255" y="130" text-anchor="middle" class="head">ESP32_MOS_X4 Controller</text>
+
+  <!-- pin labels -->
+  <g class="label">
+    <text x="350" y="185" text-anchor="end">3V3</text><circle cx="390" cy="179" r="8" fill="#e32" class="pin"/>
+    <text x="350" y="225" text-anchor="end">GND</text><circle cx="390" cy="219" r="8" fill="#111" class="pin"/>
+    <text x="350" y="265" text-anchor="end">GPIO21 / SDA</text><circle cx="390" cy="259" r="8" fill="#245be3" class="pin"/>
+    <text x="350" y="305" text-anchor="end">GPIO22 / SCL</text><circle cx="390" cy="299" r="8" fill="#26a642" class="pin"/>
+    <text x="350" y="365" text-anchor="end">GPIO16 / MOS OUT1 / LOW ALARM</text><circle cx="390" cy="359" r="8" fill="#f28a21" class="pin"/>
+    <text x="350" y="405" text-anchor="end">GPIO17 / MOS OUT2 / HIGH ALARM</text><circle cx="390" cy="399" r="8" fill="#8e44ad" class="pin"/>
+    <text x="350" y="465" text-anchor="end">GPIO19 / SENSOR SPAN</text><circle cx="390" cy="459" r="8" fill="#9b5d25" class="pin"/>
+    <text x="350" y="505" text-anchor="end">GPIO23 / SENSOR ZERO</text><circle cx="390" cy="499" r="8" fill="#e2b300" class="pin"/>
+    <text x="350" y="545" text-anchor="end">GPIO18 / SENSOR RESET</text><circle cx="390" cy="539" r="8" fill="#888" class="pin"/>
+    <text x="350" y="615" text-anchor="end">GPIO32 / BTN CAL</text><circle cx="390" cy="609" r="8" fill="#d64fa6" class="pin"/>
+    <text x="350" y="655" text-anchor="end">GPIO33 / BTN ZERO</text><circle cx="390" cy="649" r="8" fill="#42b6d9" class="pin"/>
+    <text x="350" y="695" text-anchor="end">GPIO25 / BTN RESET-ENTER</text><circle cx="390" cy="689" r="8" fill="#239b83" class="pin"/>
+  </g>
+
+  <!-- Sensor -->
+  <rect x="650" y="80" width="390" height="360" rx="4" class="sensor"/>
+  <text x="845" y="118" text-anchor="middle" class="head">ELT SM-30-3V H2S Sensor</text>
+  <text x="845" y="145" text-anchor="middle" class="small">I2C address 0x72</text>
+  <g class="label">
+    <circle cx="680" cy="190" r="8" fill="#e32" class="pin"/><text x="705" y="196">VCC / 3.3 V</text>
+    <circle cx="680" cy="230" r="8" fill="#111" class="pin"/><text x="705" y="236">GND</text>
+    <circle cx="680" cy="270" r="8" fill="#245be3" class="pin"/><text x="705" y="276">SDA — J3-9</text>
+    <circle cx="680" cy="310" r="8" fill="#26a642" class="pin"/><text x="705" y="316">SCL — J3-8</text>
+    <circle cx="680" cy="355" r="8" fill="#9b5d25" class="pin"/><text x="705" y="361">SPAN — J3-11</text>
+    <circle cx="680" cy="390" r="8" fill="#e2b300" class="pin"/><text x="705" y="396">ZERO — J3-13</text>
+    <circle cx="680" cy="425" r="8" fill="#888" class="pin"/><text x="705" y="431">RESET — J3-10</text>
+  </g>
+  <text x="865" y="350" class="small">Drive SPAN, ZERO and RESET</text>
+  <text x="865" y="370" class="small">LOW to activate.</text>
+
+  <!-- OLED -->
+  <rect x="1210" y="90" width="330" height="270" rx="4" class="oled"/>
+  <text x="1375" y="128" text-anchor="middle" class="head">128×64 OLED Display</text>
+  <text x="1375" y="154" text-anchor="middle" class="small">SSD1306 — I2C address 0x3C</text>
+  <rect x="1300" y="190" width="190" height="120" rx="8" fill="#111" stroke="#0d4f8a" stroke-width="5"/>
+  <text x="1395" y="235" text-anchor="middle" style="font:22px Arial;fill:white">H2S 0.0 ppm</text>
+  <text x="1395" y="270" text-anchor="middle" style="font:18px Arial;fill:white">LOW OK  HIGH OK</text>
+  <g class="small">
+    <circle cx="1240" cy="180" r="7" fill="#e32" class="pin"/><text x="1255" y="185">VCC</text>
+    <circle cx="1240" cy="215" r="7" fill="#111" class="pin"/><text x="1255" y="220">GND</text>
+    <circle cx="1240" cy="250" r="7" fill="#245be3" class="pin"/><text x="1255" y="255">SDA</text>
+    <circle cx="1240" cy="285" r="7" fill="#26a642" class="pin"/><text x="1255" y="290">SCL</text>
+  </g>
+
+  <!-- I2C and power wires -->
+  <path d="M398 179 H560 V190 H672" class="wire" stroke="#e32"/>
+  <path d="M560 179 V170 H1170 V180 H1233" class="wire" stroke="#e32"/>
+  <path d="M398 219 H600 V230 H672" class="wire" stroke="#111"/>
+  <path d="M600 219 V205 H1180 V215 H1233" class="wire" stroke="#111"/>
+  <path d="M398 259 H620 V270 H672" class="wire" stroke="#245be3"/>
+  <path d="M620 259 V250 H1233" class="wire" stroke="#245be3"/>
+  <path d="M398 299 H635 V310 H672" class="wire" stroke="#26a642"/>
+  <path d="M635 299 V285 H1233" class="wire" stroke="#26a642"/>
+
+  <!-- control wires -->
+  <path d="M398 459 H565 V355 H672" class="wire" stroke="#9b5d25"/>
+  <path d="M398 499 H590 V390 H672" class="wire" stroke="#e2b300"/>
+  <path d="M398 539 H615 V425 H672" class="wire" stroke="#888"/>
+
+  <!-- shared bus label -->
+  <rect x="875" y="475" width="260" height="70" rx="8" fill="#f6fbff" stroke="#2980e6" stroke-width="2" stroke-dasharray="7 5"/>
+  <text x="1005" y="505" text-anchor="middle" style="font:700 18px Arial;fill:#1769c2">Shared I2C bus</text>
+  <text x="1005" y="530" text-anchor="middle" class="small">GPIO21 SDA / GPIO22 SCL</text>
+
+  <!-- Buttons -->
+  <rect x="555" y="610" width="480" height="330" rx="4" class="buttons"/>
+  <text x="795" y="645" text-anchor="middle" class="head">Push Buttons — Connect to GND</text>
+  <text x="795" y="675" text-anchor="middle" class="small">ESP32 uses internal pull-ups; pressed button pulls GPIO LOW.</text>
+
+  <path d="M398 609 H650 V715" class="wire" stroke="#d64fa6"/>
+  <path d="M398 649 H795 V715" class="wire" stroke="#42b6d9"/>
+  <path d="M398 689 H940 V715" class="wire" stroke="#239b83"/>
+  <g class="label">
+    <text x="650" y="705" text-anchor="middle">CAL</text>
+    <text x="795" y="705" text-anchor="middle">ZERO</text>
+    <text x="940" y="705" text-anchor="middle">RESET / ENTER</text>
+  </g>
+  <!-- switches -->
+  <g stroke="#111" stroke-width="4" fill="none">
+    <line x1="650" y1="715" x2="650" y2="745"/><circle cx="650" cy="750" r="5" fill="white"/>
+    <line x1="650" y1="755" x2="625" y2="795"/><circle cx="650" cy="805" r="5" fill="white"/>
+    <line x1="795" y1="715" x2="795" y2="745"/><circle cx="795" cy="750" r="5" fill="white"/>
+    <line x1="795" y1="755" x2="770" y2="795"/><circle cx="795" cy="805" r="5" fill="white"/>
+    <line x1="940" y1="715" x2="940" y2="745"/><circle cx="940" cy="750" r="5" fill="white"/>
+    <line x1="940" y1="755" x2="915" y2="795"/><circle cx="940" cy="805" r="5" fill="white"/>
+    <line x1="650" y1="805" x2="940" y2="805"/>
+    <line x1="795" y1="805" x2="795" y2="845"/>
+    <line x1="770" y1="845" x2="820" y2="845"/>
+    <line x1="778" y1="855" x2="812" y2="855"/>
+    <line x1="787" y1="865" x2="803" y2="865"/>
+  </g>
+  <text x="795" y="895" text-anchor="middle" class="label">GND</text>
+
+  <!-- Alarm lamps and supply -->
+  <rect x="1080" y="590" width="200" height="180" rx="5" class="alarm"/>
+  <rect x="1335" y="590" width="200" height="180" rx="5" class="alarm"/>
+  <text x="1180" y="625" text-anchor="middle" class="head">LOW Alarm</text>
+  <text x="1435" y="625" text-anchor="middle" class="head">HIGH Alarm</text>
+  <circle cx="1180" cy="690" r="36" class="lamp"/><line x1="1155" y1="665" x2="1205" y2="715" stroke="#111" stroke-width="4"/><line x1="1205" y1="665" x2="1155" y2="715" stroke="#111" stroke-width="4"/>
+  <circle cx="1435" cy="690" r="36" class="lamp"/><line x1="1410" y1="665" x2="1460" y2="715" stroke="#111" stroke-width="4"/><line x1="1460" y1="665" x2="1410" y2="715" stroke="#111" stroke-width="4"/>
+
+  <rect x="1180" y="420" width="300" height="110" rx="5" fill="#fff8f8" stroke="#d62727" stroke-width="3"/>
+  <text x="1330" y="455" text-anchor="middle" style="font:700 20px Arial;fill:#c22">External Lamp Supply</text>
+  <text x="1330" y="482" text-anchor="middle" class="label">12–24 VDC typical</text>
+  <text x="1330" y="510" text-anchor="middle" style="font:700 20px Arial;fill:#c22">V+</text>
+  <path d="M1330 530 V560 H1180 V650" class="wire" stroke="#e22"/>
+  <path d="M1330 560 H1435 V650" class="wire" stroke="#e22"/>
+  <text x="1162" y="655" class="label">+</text><text x="1417" y="655" class="label">+</text>
+
+  <!-- low-side return wires -->
+  <path d="M398 359 H520 V755 H1080 V735 H1180" class="wire" stroke="#f28a21"/>
+  <path d="M398 399 H505 V785 H1300 V735 H1435" class="wire" stroke="#8e44ad"/>
+  <text x="1162" y="750" class="label">−</text><text x="1417" y="750" class="label">−</text>
+
+  <!-- common ground for supply -->
+  <path d="M1480 530 H1545 V875" class="wire" stroke="#111"/>
+  <path d="M1520 875 H1570" class="ground"/><path d="M1528 887 H1562" class="ground"/><path d="M1538 899 H1552" class="ground"/>
+  <text x="1460" y="930" class="small">Lamp supply GND must be common with ESP32 GND.</text>
+
+  <!-- Notes -->
+  <rect x="40" y="800" width="470" height="210" rx="5" class="notes"/>
+  <text x="65" y="835" class="head">Notes</text>
+  <text x="65" y="870" class="note">• Sensor and OLED share the 3.3 V I2C bus.</text>
+  <text x="65" y="900" class="note">• SPAN, ZERO and RESET are active-LOW sensor controls.</text>
+  <text x="65" y="930" class="note">• Alarm lamps are shown as low-side MOSFET loads.</text>
+  <text x="65" y="960" class="note">• Verify ESP32_MOS_X4 output mapping for your board revision.</text>
+  <text x="65" y="990" class="note">• Verify all voltage/current ratings before field wiring.</text>
+
+  <text x="1570" y="1020" text-anchor="end" class="small">H2SSensor engineering prototype — homershaw/Sensors</text>
+</svg>
