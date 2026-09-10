@@ -34,96 +34,206 @@ The H2S-SM30-3V uses I2C slave address **0x72**. The ELT datasheet specifies wri
 
 Community reverse-engineering of the ESP32_MOS_X4 reports MOSFET channels OUT1..OUT4 as GPIO **16, 17, 26, 27**. This project uses OUT1 and OUT2 only.
 
-## Wiring diagram
+## High-resolution wiring schematic
+
+The diagram below is stored as an SVG vector drawing so it remains sharp when zoomed, printed, or viewed on a large monitor.
+
+![H2SSensor high-resolution wiring schematic](docs/images/h2ssensor_wiring_schematic.svg)
+
+### Wiring summary
+
+#### ELT SM-30-3V H2S sensor
+
+| Sensor connection | ESP32 connection | Notes |
+|---|---|---|
+| VCC / +3.3 V | 3V3 | Do not apply 5 V to the 3.3 V sensor model |
+| GND | GND | Common system ground |
+| J3-9 SDA | GPIO21 | Shared I2C SDA bus |
+| J3-8 SCL | GPIO22 | Shared I2C SCL bus |
+| J3-11 SPAN | GPIO19 | Active LOW |
+| J3-13 ZERO | GPIO23 | Active LOW |
+| J3-10 RESET | GPIO18 | Active LOW |
+
+#### OLED 128×64 SSD1306
+
+| OLED connection | ESP32 connection |
+|---|---|
+| VCC | 3V3 |
+| GND | GND |
+| SDA | GPIO21 |
+| SCL | GPIO22 |
+
+The OLED and H2S sensor share the same I2C bus. The default addresses are different: OLED `0x3C`, H2S sensor `0x72`.
+
+If the OLED module contains pull-ups to 5 V, **do not power it from 5 V** on this bus. Use a 3.3 V-compatible OLED and pull-up arrangement.
+
+#### Front-panel pushbuttons
+
+The three buttons are normally-open momentary switches connected between the assigned GPIO and GND. Firmware enables the ESP32 internal pull-ups, so an unpressed button reads HIGH and a pressed button reads LOW.
+
+| Button | ESP32 GPIO | Function |
+|---|---:|---|
+| CAL | 32 | Calibration / increase setpoint |
+| ZERO | 33 | Zero / decrease setpoint |
+| RESET / ENTER | 25 | Reset / enter / save |
+
+#### Low and high alarm lamps
+
+The alarm lamps are driven by two MOSFET outputs on the ESP32_MOS_X4 board.
+
+| Alarm | MOSFET output | GPIO |
+|---|---|---:|
+| LOW alarm | OUT1 | 16 |
+| HIGH alarm | OUT2 | 17 |
+
+Typical low-side wiring is:
+
+- External lamp supply **V+** → lamp positive terminal
+- LOW lamp negative terminal → MOSFET OUT1
+- HIGH lamp negative terminal → MOSFET OUT2
+- External lamp supply GND → common ESP32/system GND
+
+Use a lamp supply appropriate for the installed lamps, commonly 12–24 VDC. Verify the exact ESP32_MOS_X4 MOSFET voltage/current capability before connecting field loads.
+
+### Text wiring fallback
+
+The following simplified drawing is retained for environments that do not render SVG images:
 
 ```mermaid
 flowchart LR
-    PWR[3.3 V regulated] --> H2SVDD[H2S-SM30-3V VDD]
-    PWR --> OLEDV[OLED VCC\n3.3 V]
+    PWR[3.3 V] --> H2SVDD[H2S-SM30-3V VCC]
+    PWR --> OLEDV[OLED VCC]
     GND[Common GND] --> H2SGND[H2S GND]
     GND --> OLEDG[OLED GND]
-    GND --> B1[CAL button]
-    GND --> B2[ZERO button]
-    GND --> B3[RESET/ENTER button]
 
-    ESP21[ESP32 GPIO21 SDA] --- H2SSDA[H2S J3-9 SDA]
+    ESP21[GPIO21 SDA] --- H2SSDA[H2S J3-9 SDA]
     ESP21 --- OLEDSDA[OLED SDA]
-    ESP22[ESP32 GPIO22 SCL] --- H2SSCL[H2S J3-8 SCL]
+    ESP22[GPIO22 SCL] --- H2SSCL[H2S J3-8 SCL]
     ESP22 --- OLEDSCL[OLED SCL]
 
-    ESP19[GPIO19] --> H2SSPAN[H2S J3-11 Manual Span]
-    ESP23[GPIO23] --> H2SZERO[H2S J3-13 Manual Zero]
-    ESP18[GPIO18] --> H2SRESET[H2S J3-10 Reset]
+    ESP19[GPIO19] --> H2SSPAN[H2S J3-11 SPAN]
+    ESP23[GPIO23] --> H2SZERO[H2S J3-13 ZERO]
+    ESP18[GPIO18] --> H2SRESET[H2S J3-10 RESET]
 
-    B1 --> ESP32B1[GPIO32]
-    B2 --> ESP32B2[GPIO33]
-    B3 --> ESP32B3[GPIO25]
+    CAL[CAL button to GND] --> GPIO32[GPIO32]
+    ZERO[ZERO button to GND] --> GPIO33[GPIO33]
+    ENTER[RESET/ENTER button to GND] --> GPIO25[GPIO25]
 
-    MOS1[MOSFET OUT1 / GPIO16] --> LOWLAMP[LOW alarm lamp]
-    MOS2[MOSFET OUT2 / GPIO17] --> HIGHLAMP[HIGH alarm lamp]
+    SUPPLY[12-24 VDC lamp supply +] --> LOWLAMP[LOW alarm lamp]
+    SUPPLY --> HIGHLAMP[HIGH alarm lamp]
+    LOWLAMP --> MOS1[MOSFET OUT1 / GPIO16]
+    HIGHLAMP --> MOS2[MOSFET OUT2 / GPIO17]
 ```
-
-### Sensor side-hole J3 connections
-
-| H2S-SM30-3V J3 | Connection |
-|---:|---|
-| 3 | GND |
-| 4 | +3.3 V |
-| 8 | I2C SCL → GPIO22 |
-| 9 | I2C SDA → GPIO21 |
-| 10 | Reset, active LOW → GPIO18 |
-| 11 | Manual span → GPIO19 |
-| 13 | Manual zero → GPIO23 |
-
-The ELT sensor and OLED share the I2C bus. If the OLED module contains pull-ups to 5 V, **do not power it from 5 V** on this bus; use a 3.3 V-compatible OLED/pull-up arrangement.
 
 ## Button operation
 
-Normal operation:
+### Normal operation
 
 - **CAL**: starts the sensor manual span-calibration pulse sequence. Only use while the sensor is exposed to the calibration concentration specified for your exact H2S-SM30-3V revision.
 - **ZERO**: starts the sensor manual zero-calibration pulse sequence. Only use in verified H2S-free gas/air as required by the sensor procedure.
 - **RESET/ENTER**: resets the ELT sensor interface.
 
-Setpoint mode:
+### Setpoint adjustment
 
 1. Hold **CAL + ZERO together for 3 seconds** to enter setpoint adjustment.
-2. CAL increases the selected setpoint; ZERO decreases it.
-3. RESET/ENTER accepts the value and moves from LOW to HIGH setpoint.
-4. Press RESET/ENTER again to save both setpoints to ESP32 flash and return to normal operation.
+2. CAL increases the selected setpoint.
+3. ZERO decreases the selected setpoint.
+4. RESET/ENTER accepts the LOW setpoint and moves to HIGH.
+5. Press RESET/ENTER again to save both setpoints to ESP32 flash and return to normal operation.
 
 Setpoints, software calibration, Wi-Fi credentials, MQTT configuration, publish interval and tag enables are stored with ESP32 `Preferences` (NVS).
 
 ## Alarm filtering
 
-The application samples H2S once per second and maintains a rolling average (default 10 samples). Alarm decisions use the filtered concentration, not the latest raw sample. A configurable hysteresis is also applied so a value close to a threshold does not chatter the lamp.
+The application samples H2S once per second and maintains a configurable rolling average. The default filter uses **10 samples**.
 
-Default thresholds are intentionally placeholders and **must be set for the intended jurisdiction/site procedure before use**.
+Alarm decisions use the filtered concentration rather than a single raw reading. Configurable hysteresis is also applied so temporary sensor noise or a concentration hovering around the threshold does not cause the alarm lamps to flicker or chatter.
 
-## Wi-Fi and web interface
+Example behavior with a LOW alarm setpoint of 5.0 ppm and 0.5 ppm hysteresis:
 
-At boot the unit creates an access point named similar to:
+- LOW alarm activates when the filtered value reaches 5.0 ppm.
+- Once active, LOW alarm remains active until the filtered value falls to 4.5 ppm or below.
+
+Default thresholds are placeholders and **must be configured for the intended jurisdiction, site, and operating procedure before use**.
+
+## OLED display
+
+The 128×64 SSD1306 OLED provides local indication of:
+
+- Filtered H2S concentration
+- LOW alarm condition
+- HIGH alarm condition
+- Sensor communication state
+- Setpoint adjustment screens
+- Calibration/reset status
+- Wi-Fi status where appropriate
+
+The OLED uses I2C address `0x3C` by default.
+
+## Wi-Fi and captive portal
+
+The unit can operate without an external Wi-Fi network.
+
+At boot it creates an access point named similar to:
 
 `H2SSensor-A1B2C3`
 
-Open `http://192.168.4.1/` while connected to that AP. The AP remains available even if the unit successfully joins a configured Wi-Fi network, so the sensor can be commissioned or used standalone without an external network.
+Connect a phone, tablet, or computer to the access point and browse to:
 
-Web pages:
+`http://192.168.4.1/`
 
-- `/` — live H2S reading, raw reading, sensor health, LOW/HIGH alarm status, setpoints, Wi-Fi and MQTT state
-- `/wifi` — scan/select SSID, save credentials, disconnect/standalone mode
-- `/cal` — software zero/span calibration values plus controlled ELT hardware zero/span/reset actions
-- `/alarms` — low/high setpoints, hysteresis and rolling-average sample count
-- `/mqtt` — broker/port/user/password, base topic, minimum publish interval
-- `/tags` — enable/disable individual MQTT tags and edit their topic suffixes
-- `/instructions` — quick operating instructions
-- `/api/status` — JSON status endpoint
+The access point remains available even if the controller also joins a configured Wi-Fi network. This permits commissioning and local access when no infrastructure network is available.
+
+## Web interface
+
+The built-in web server provides:
+
+| Page | Purpose |
+|---|---|
+| `/` | Live H2S reading, raw value, filtered value, sensor health, alarm state, setpoints, Wi-Fi and MQTT status |
+| `/wifi` | Scan/select Wi-Fi network, save credentials, or operate standalone |
+| `/alarms` | Configure LOW/HIGH setpoints, hysteresis, and rolling-average sample count |
+| `/cal` | Software calibration plus controlled ELT hardware ZERO/SPAN/RESET actions |
+| `/mqtt` | MQTT broker, port, username/password, base topic and minimum publish interval |
+| `/tags` | Enable/disable individual MQTT tags and configure topic suffixes |
+| `/instructions` | Local operating and calibration instructions |
+| `/api/status` | JSON status endpoint for diagnostics/integration |
+
+## Calibration
+
+Two different calibration mechanisms are intentionally separated.
+
+### ELT sensor hardware calibration
+
+The ELT sensor exposes active-LOW ZERO and SPAN inputs. Firmware can operate these from either the physical buttons or the calibration web page.
+
+Only perform ZERO in verified H2S-free gas/air according to the sensor procedure. Only perform SPAN using certified calibration gas at the concentration specified for the exact ELT sensor revision in use.
+
+### Software calibration
+
+Software zero and gain values are stored in ESP32 flash using NVS. These values can be used to align the displayed/transmitted engineering value with a known reference during development and validation.
+
+Software calibration does not replace required sensor calibration or certified gas-detector procedures.
 
 ## MQTT
 
-MQTT is optional. The minimum publish interval prevents excessive traffic even if web/status updates are faster. Each tag can be independently enabled.
+MQTT is optional and can be disabled completely.
 
-Default topics are below `<baseTopic>`:
+Configuration includes:
+
+- Enable/disable MQTT
+- Broker host/IP
+- Broker port
+- Username
+- Password
+- Base topic
+- Minimum publish interval
+- Per-tag enable/disable flags
+- Editable topic suffixes
+
+The minimum publish interval prevents excessive traffic even though sensor sampling and web display updates may occur more frequently.
+
+Default MQTT tags below `<baseTopic>` are:
 
 - `h2s_ppm`
 - `h2s_raw_ppm`
@@ -137,37 +247,116 @@ Payloads are plain numeric/boolean values and are published retained.
 
 ## Build with PlatformIO
 
+Clone the repository:
+
 ```bash
 git clone https://github.com/homershaw/Sensors.git
 cd Sensors
-pio run
 ```
 
-Upload using a 3.3 V USB-to-TTL adapter and the board's programming header. Power the ESP32_MOS_X4 separately if your adapter cannot safely supply the board. Typical serial wiring is adapter TX → board RX, adapter RX → board TX, and GND → GND. Hold IO0 low during reset/boot to enter the ESP32 download bootloader when required.
+Compile the ESP32_MOS_X4 environment:
 
 ```bash
-pio run -t upload
+pio run -e esp32_mos_x4
+```
+
+Upload firmware:
+
+```bash
+pio run -e esp32_mos_x4 -t upload
+```
+
+Open the serial monitor:
+
+```bash
 pio device monitor -b 115200
 ```
 
+The project currently uses the PlatformIO `esp32dev` board definition as the ESP32_MOS_X4 base target. Verify flashing/programming connections and your board revision before applying field power.
+
 ## Documentation
 
-See [`docs/User_Manual.md`](docs/User_Manual.md) for commissioning, calibration, web/MQTT setup, alarms, troubleshooting and field-test guidance.
+See [`docs/User_Manual.md`](docs/User_Manual.md) for commissioning, calibration, web/MQTT setup, alarms, troubleshooting, and field-test guidance.
 
-## Initial validation checklist
+Additional engineering notes are in [`docs/Hardware_Notes.md`](docs/Hardware_Notes.md).
 
-Before treating a build as validated, confirm on actual hardware:
+The vector wiring schematic is stored at:
 
-1. I2C scan finds OLED at `0x3C` (or configured alternate address) and H2S sensor at `0x72`.
-2. Raw seven-byte H2S packets change correctly when test gas is applied.
-3. OLED value agrees with a known/reference instrument or ELT evaluation software.
-4. OUT1 and OUT2 correspond to GPIO16/GPIO17 on your specific ESP32_MOS_X4 revision.
-5. CAL/ZERO/RESET control lines idle HIGH and only pull LOW for the intended action.
-6. LOW/HIGH lamps switch at the configured filtered thresholds and clear with hysteresis.
-7. Setpoints survive reboot.
-8. Wi-Fi AP works with no infrastructure network configured.
-9. MQTT respects tag enable flags and minimum publish interval.
+[`docs/images/h2ssensor_wiring_schematic.svg`](docs/images/h2ssensor_wiring_schematic.svg)
 
-## License / status
+## Initial validation gates
 
-Initial engineering prototype. Validate all pin mappings and sensor calibration behavior against the exact hardware revision before deployment.
+This project should be validated in small hardware gates rather than assuming the complete system works after compilation.
+
+### Gate 1 — Compile
+
+```bash
+pio run -e esp32_mos_x4
+```
+
+Do not proceed until the firmware compiles without errors.
+
+### Gate 2 — I2C hardware
+
+Confirm an I2C scan finds:
+
+- OLED at `0x3C`
+- H2S sensor at `0x72`
+
+### Gate 3 — Real H2S data
+
+Confirm the raw seven-byte H2S packet is received consistently and that the interpreted concentration changes appropriately with known test gas.
+
+### Gate 4 — Buttons and sensor controls
+
+Verify:
+
+- CAL button
+- ZERO button
+- RESET/ENTER button
+- Sensor SPAN line
+- Sensor ZERO line
+- Sensor RESET line
+
+All ELT control lines must idle HIGH and only pull LOW for the intended action.
+
+### Gate 5 — Alarm outputs
+
+Confirm OUT1 and OUT2 correspond to GPIO16 and GPIO17 on the exact ESP32_MOS_X4 board revision and that LOW/HIGH lamps operate correctly.
+
+### Gate 6 — Filtering and setpoints
+
+Confirm:
+
+- Rolling-average filtering behaves as intended
+- Short sensor spikes do not flicker the alarm lamps
+- Hysteresis prevents threshold chatter
+- LOW and HIGH setpoints save correctly
+- Setpoints survive reboot
+
+### Gate 7 — Wi-Fi and web UI
+
+Confirm:
+
+- Standalone access point operates with no external network
+- Captive/local web interface is reachable
+- Infrastructure Wi-Fi credentials save and reconnect
+- Alarm/calibration/MQTT/tag pages function correctly
+
+### Gate 8 — MQTT
+
+Confirm:
+
+- MQTT enable/disable works
+- Broker reconnect works
+- Per-tag enable flags work
+- Minimum publish interval is respected
+- Published values agree with the local display/web status
+
+## Project status
+
+Initial engineering prototype.
+
+The firmware and documentation are intended to be validated against the physical ESP32_MOS_X4 and ELT H2S-SM30-3V hardware before any deployment decision is made.
+
+Do **not** treat a successful compile as proof of correct gas measurement, alarm performance, electrical safety, or life-safety suitability.
